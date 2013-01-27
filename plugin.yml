@@ -1,7 +1,7 @@
 name: DeityCreative
 version: 2.1.0
 authors: [ImDeity, KILL3RTACO]
-website: http://imdeity.com
+website: http://www.imdeity.com
 description: ImDeity Creative
 main: com.imdeity.deitycreative.DeityCreative
 depend: [DeityAPI]

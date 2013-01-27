@@ -54,19 +54,19 @@ public class Plot {
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "0"); //air
 				
 				minMarker = new Location(world, plotMinX, 1, plotMinZ);
-				maxMarker = new Location(world, plotMaxX, 2, plotMaxZ); //originally 18
+				maxMarker = new Location(world, plotMaxX, 18, plotMaxZ);
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "3"); //dirt
 				
-				minMarker = new Location(world, plotMinX, 3, plotMinZ); //originally 19
-				maxMarker = new Location(world, plotMaxX, 3, plotMaxZ); //originally 19
+				minMarker = new Location(world, plotMinX, 19, plotMinZ);
+				maxMarker = new Location(world, plotMaxX, 19, plotMaxZ);
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "2"); //grass
 				
-				minMarker = new Location(world, plotMinX, 4, plotMinZ); //originally 20
-				maxMarker = new Location(world, plotMaxX, 4, plotMaxZ); //originally 20
+				minMarker = new Location(world, plotMinX, 20, plotMinZ);
+				maxMarker = new Location(world, plotMaxX, 20, plotMaxZ);
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "43"); //double half slab
 				
-				minMarker = new Location(world, plotMinX, 4, plotMinZ); //originally 20
-				maxMarker = new Location(world, plotMaxX - pathSize, 4, plotMaxZ - pathSize); //originally 20
+				minMarker = new Location(world, plotMinX, 20, plotMinZ);
+				maxMarker = new Location(world, plotMaxX - pathSize, 20, plotMaxZ - pathSize); //originally 20
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "0"); //air
 				
 				setupRegion(plotMinX, plotMinZ, (plotMaxX - pathSize), (plotMaxZ - pathSize), size, world, sender);
@@ -76,11 +76,11 @@ public class Plot {
 		//create missing edges
 		int sideLength = (size * side) + (side * pathSize) - 1;
 		
-		Location corner = new Location(world, playerX - pathSize + 1, 4, playerZ - pathSize + 1);
-		Location point = new Location(world, playerX, 4, playerZ + sideLength);
+		Location corner = new Location(world, playerX - pathSize + 1, 20, playerZ - pathSize + 1);
+		Location point = new Location(world, playerX, 20, playerZ + sideLength);
 		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), corner, point, "43"); //double half slab
 		
-		point = new Location(world, playerX + sideLength, 4, playerZ);
+		point = new Location(world, playerX + sideLength, 20, playerZ);
 		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), corner, point, "43"); //double half slab
 		
 		DeityCreative.plugin.chat.sendPlayerMessage(player, "&aDone creating plots " + plotCount + " plots!");

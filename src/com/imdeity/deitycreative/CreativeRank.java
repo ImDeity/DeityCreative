@@ -18,7 +18,13 @@ public enum CreativeRank {
 	}
 	
 	public String getName(){
+		return name;
+	}
+	
+	public String getColorfulName(){
 		return color + name;
 	}
+	
+	public String toString(){ return getName(); }
 	
 }
