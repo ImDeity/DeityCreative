@@ -2,6 +2,10 @@ package com.imdeity.deitycreative;
 
 import org.bukkit.World;
 
+/*
+ * Copied from first DeityCreative
+ */
+
 public class TimeLocker implements Runnable {
 
 	private World world;
@@ -17,3 +21,4 @@ public class TimeLocker implements Runnable {
 		}
 	}
 }
+

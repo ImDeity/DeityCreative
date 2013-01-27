@@ -2,393 +2,294 @@ package com.imdeity.deitycreative;
 
 import java.io.IOException;
 import java.sql.SQLDataException;
-import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.imdeity.deityapi.Deity;
+import com.imdeity.deityapi.DeityAPI;
 import com.imdeity.deityapi.records.DatabaseResults;
 
 public class Plot {
-    private int id = 0;
-    private String playername = "";
-    private World world = null;
-    private Location minPoint;
-    private Location maxPoint;
-    private boolean isClaimed = false;
-	private Integer plotSize = null;
-    
-    public final static Logger log = Logger.getLogger("Minecraft");
 
-    public Plot(int id) {
-            String sql = "SELECT `id`, `playername`, `world`, `min_x`, `max_x`, `min_z`, `max_z`, `is_claimed`, `plot_size`"
-                            + " FROM "
-                            + Deity.data.getDB().tableName("deity_creative_", "plots")
-                            + " WHERE `id` = ?;";
-            DatabaseResults query = Deity.data.getDB().Read2(sql, id);
-            if (query != null) {
-                    try {
-                            setAllFields(query);
-                    } catch (SQLDataException e) {
-                            e.printStackTrace();
-                    }
-            }
-    }
-
-    
-	public static boolean newPlot(Player player, CommandSender sender, int plotSideCnt, int plotSize) {
-		
-		int pathSize = 4;
-		
-		int plotSizePlusPath = plotSize + pathSize;
-		
-		Location playerLoc = player.getLocation();
-		World currentWorld = playerLoc.getWorld();
-		
-		int changedBlocks = 0;
-		
-		// Round player position
-		double playerX = Math.floor(playerLoc.getX());
-		double playerZ = Math.floor(playerLoc.getZ());
-		
-		int createdPlotCnt = 0;
-		
-		// The big double-loop
-		for (int j = 0; j < plotSideCnt; j++) {
-			for (int i = 0; i < plotSideCnt; i++) {
-				
-				createdPlotCnt++;
-				
-				// First, flatten area for the whole plot + roads
-				double plotMinX = playerX + (i * plotSizePlusPath);
-				double plotMinZ = playerZ + (j * plotSizePlusPath);
-				
-				double plotMaxX = plotMinX + plotSizePlusPath - 1;
-				double plotMaxZ = plotMinZ + plotSizePlusPath - 1; 
-				
-				Location minMarker = new Location(currentWorld,
-						plotMinX, 1, plotMinZ);
-				Location maxMarker = new Location(currentWorld,
-						(plotMaxX), 127, 
-						(plotMaxZ));
-				changedBlocks = Deity.edit.setAreaWithBlock(
-						currentWorld.getName(), minMarker, maxMarker, "0");
-				if (changedBlocks > 0) {
-					// Deity.chat.sendPlayerMessage(player, "Cleared land.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-					log.info("Cleared land.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-					// log.info("i: " + i + "; j: " + j + "; minx: " + plotMinX + "; minz: " + plotMinZ + "; maxX: " + plotMaxX + "; maxZ: " + plotMaxZ);
-				}
-				
-				
-				// Create base dirt
-				minMarker = new Location(currentWorld,
-						plotMinX, 1, plotMinZ);
-				maxMarker = new Location(currentWorld,
-						(plotMaxX), 18, 
-						(plotMaxZ));				
-				changedBlocks = Deity.edit.setAreaWithBlock(
-						currentWorld.getName(), minMarker, maxMarker, "3");
-				if (changedBlocks > 0) {
-					// Deity.chat.sendPlayerMessage(player, "Set base dirt.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-					log.info("Set base dirt.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-				}
-				
-				// Create base grass
-				minMarker = new Location(currentWorld,
-						plotMinX, 19, plotMinZ);
-				maxMarker = new Location(currentWorld,
-						(plotMaxX), 19, 
-						(plotMaxZ));				
-				changedBlocks = Deity.edit.setAreaWithBlock(
-						currentWorld.getName(), minMarker, maxMarker, "2");
-				if (changedBlocks > 0) {
-					// Deity.chat.sendPlayerMessage(player, "Set base grass.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-					log.info("Set base grass.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-				}
-				
-				// Set path bricks over whole thing
-				minMarker = new Location(currentWorld,
-						plotMinX, 20, plotMinZ);
-				maxMarker = new Location(currentWorld,
-						(plotMaxX), 20, 
-						(plotMaxZ));		
-				changedBlocks = Deity.edit.setAreaWithBlock(
-						currentWorld.getName(), minMarker, maxMarker, "43");
-				if (changedBlocks > 0) {
-					// Deity.chat.sendPlayerMessage(player, "Creating path layer.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-					log.info("Creating path layer.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-				}
-		
-				
-				// Clear topmost layer of path bricks to expose buildable area
-				minMarker = new Location(currentWorld,
-						plotMinX, 20, plotMinZ);
-				maxMarker = new Location(currentWorld,
-						(plotMaxX - pathSize), 20, (plotMaxZ - pathSize));		
-				changedBlocks = Deity.edit.setAreaWithBlock(
-						currentWorld.getName(), minMarker, maxMarker, "0");
-				if (changedBlocks > 0) {
-					// Deity.chat.sendPlayerMessage(player, "Exposing buildable area.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-					log.info("Exposing buildable area.. " + changedBlocks + " modified (" + createdPlotCnt + ")");
-				}
-				
-				// Create region
-				setupRegion(plotMinX, plotMinZ, (plotMaxX - pathSize), (plotMaxZ - pathSize), plotSize, currentWorld, sender);
+	public static final int DEFAULT_SIZE = 16;
+	private String playername;
+	private Location minPoint, maxPoint;
+	private World world;
+	private int plotSize, id;
+	private boolean isClaimed;
+	
+	public Plot(int id){
+		String sql = "SELECT `id`, `playername`, `world`, `min_x`, `max_x`, `min_z`, `max_z`, `is_claimed`, `plot_size` FROM "
+				+ DeityCreative.database.tableName("deity_creative_", "plots") + " WHERE `id` = ?;";
+		DatabaseResults query = DeityCreative.database.readEnhanced(sql, id);
+		if (query != null) {
+			try {
+				setAllFields(query);
+			} catch (SQLDataException e) {
+				e.printStackTrace();
 			}
 		}
-
-		Deity.chat.sendPlayerMessage(player, "&aDone creating plots " + createdPlotCnt + " plots!");
-		
-		
-		return true;
 	}
-    
-	// Creates region
-    private static void setupRegion(double plotMinX, double plotMinZ, double plotMaxX,
-			double plotMaxZ, int plotSize, World currentWorld, CommandSender sender) {
-		
-    	String sql = "SELECT MAX(id) FROM "
-            + Deity.data.getDB().tableName("deity_creative_", "plots") + " WHERE id > 2000";
-		DatabaseResults query = Deity.data.getDB().Read2(sql);
-		
-        if (query != null) {
-            try {
-                    int id = 3000;
-                    if (query.getInteger(0, "MAX(id)") != null
-                                    && query.getInteger(0, "MAX(id)") != 0) {
-                            id = query.getInteger(0, "MAX(id)") + 1;
-                    }
-                    sql = "INSERT INTO "
-                                    + Deity.data.getDB().tableName("deity_creative_",
-                                                    "plots")
-                                    + " (`id`, `world`, `min_x`, `min_z`, `max_x`, `max_z`, plot_size) "
-                                    + " VALUES (?, ?, ?, ?, ?, ?, ?);";
-
-                    Deity.data.getDB().Write(sql, id, currentWorld.getName(),
-                                    (int) plotMinX, (int) plotMinZ,
-                                    (int) plotMaxX, (int) plotMaxZ, plotSize);
-                    Deity.sec.protectRegion(currentWorld, "creative_" + id,
-                    		new Location(currentWorld, plotMinX, 1, plotMinZ),
-                    		new Location(currentWorld, plotMaxX, 127, plotMaxZ));
-                    Deity.sec.setGreetingFlag("creative_" + id, sender,
-    						"Available Plot [" + id + "]");
-            } catch (SQLDataException e1) {
-                    e1.printStackTrace();
-            } catch (Exception e) {
-                    e.printStackTrace();
-            }
-        }
-	}
-
-
-	public static void newPlot(World world, Location pointMin, Location pointMax) {
-            if (pointMin.getX() > pointMax.getX()) {
-                    double tmpMinX = pointMin.getX();
-                    double tmpMaxX = pointMax.getX();
-                    pointMin.setX(tmpMaxX);
-                    pointMax.setX(tmpMinX);
-            }
-            if (pointMin.getZ() > pointMax.getZ()) {
-                    double tmpMinZ = pointMin.getZ();
-                    double tmpMaxZ = pointMax.getZ();
-                    pointMin.setZ(tmpMaxZ);
-                    pointMax.setZ(tmpMinZ);
-            }
-
-            String sql = "SELECT MAX(id) FROM "
-                            + Deity.data.getDB().tableName("deity_creative_", "plots") + " WHERE id > 2000";
-            DatabaseResults query = Deity.data.getDB().Read2(sql);
-
-            if (query != null) {
-                    try {
-                            int id = 3000;
-                            if (query.getInteger(0, "MAX(id)") != null
-                                            && query.getInteger(0, "MAX(id)") != 0) {
-                                    id = query.getInteger(0, "MAX(id)") + 1;
-                            }
-                            sql = "INSERT INTO "
-                                            + Deity.data.getDB().tableName("deity_creative_",
-                                                            "plots")
-                                            + " (`id`, `world`, `min_x`, `min_z`, `max_x`, `max_z`) "
-                                            + " VALUES (?, ?,?,?,?,?);";
-
-                            Deity.data.getDB().Write(sql, id, world.getName(),
-                                            (int) pointMin.getX(), (int) pointMin.getZ(),
-                                            (int) pointMax.getX(), (int) pointMax.getZ());
-                            Deity.sec.protectRegion(world, "creative_" + id, pointMin,
-                                            pointMax);
-                    } catch (SQLDataException e1) {
-                            e1.printStackTrace();
-                    } catch (Exception e) {
-                            e.printStackTrace();
-                    }
-            }
-
-    }
-
-    public void setAllFields(DatabaseResults query) throws SQLDataException {
-            if (query.getInteger(0, "id") != null) {
-                    this.id = query.getInteger(0, "id");
-            }
-            if (query.getString(0, "playername") != null) {
-                    this.playername = (query.getString(0, "playername"));
-            }
-            if (query.getString(0, "world") != null) {
-                    this.world = Deity.server.getServer().getWorld(
-                                    query.getString(0, "world"));
-            }
-            int x = 0, z = 0;
-            if (query.getInteger(0, "min_x") != null) {
-                    x = query.getInteger(0, "min_x");
-            }
-            if (query.getInteger(0, "min_z") != null) {
-                    z = query.getInteger(0, "min_z");
-            }
-            this.minPoint = new Location(world, x, 1, z);
-
-            if (query.getInteger(0, "max_x") != null) {
-                    x = query.getInteger(0, "max_x");
-            }
-            if (query.getInteger(0, "max_z") != null) {
-                    z = query.getInteger(0, "max_z");
-            }
-            if (query.getInteger(0, "plot_size") != null) {
-            	this.plotSize = query.getInteger(0, "plot_size");
-            }
-            this.maxPoint = new Location(world, x, 127, z);
-
-            if (query.getInteger(0, "is_claimed") != null) {
-                    this.isClaimed = (query.getInteger(0, "is_claimed") == 0 ? false
-                                    : true);
-            }
-    }
-
-    public int getId() {
-            return id;
-    }
-
-    public void setId(int id) {
-            this.id = id;
-    }
-
-    public void addPlayer(String playername) throws IOException {
-            this.playername = playername;
-            /*
-            String sql = "UPDATE "
-                            + Deity.data.getDB().tableName("deity_creative_", "plots")
-                            + " SET `playername` = ? WHERE `id` = ?;";
-
-            Deity.data.getDB().Write(sql, playername, this.getId());
-            */
-            Deity.sec.addMemberToRegion(playername, this.getWorld(), "creative_"
-                            + this.getId());
-    }
-
-    public void removePlayer(String playername) throws IOException {
-            this.playername = "";
-            String sql = "UPDATE "
-                            + Deity.data.getDB().tableName("deity_creative_", "plots")
-                            + " SET `playername` = '' WHERE `id` = ?;";
-            Deity.data.getDB().Write(sql, this.getId());
-            Deity.sec.removeMemberFromRegion(playername, this.getWorld(),
-                            "creative_" + this.getId());
-    }
-
-    public String getPlayername() {
-            return playername;
-    }
-
-    public World getWorld() {
-            return world;
-    }
-
-    public void setWorld(World world) {
-            this.world = world;
-    }
-
-    public Location getMinPoint() {
-            return minPoint;
-    }
-
-    public void setMinPoint(Location minPoint) {
-            this.minPoint = minPoint;
-    }
-
-    public Location getMaxPoint() {
-            return maxPoint;
-    }
-
-    public void setMaxPoint(Location maxPoint) {
-            this.maxPoint = maxPoint;
-    }
-    
-    public Integer getPlotSize() {
-    	return plotSize;
-    }
-
-    public boolean isClaimed() {
-            return isClaimed;
-    }
-
-    public void setClaimed(boolean isClaimed) {
-            this.isClaimed = isClaimed;
-    }
-
-    public void save() {
-            String sql = "UPDATE "
-                            + Deity.data.getDB().tableName("deity_creative_", "plots")
-                            + " SET `playername` = ?, `world` = ?, `min_x` = ?, `min_z` = ?, "
-                            + "`max_x` = ?, `max_z` = ?, `plot_size` = ?, `is_claimed` = ? WHERE `id` = ?;";
-
-            Deity.data.getDB().Write(sql, this.playername, this.world.getName(),
-                            (int) this.minPoint.getX(), (int) this.minPoint.getZ(),
-                            (int) this.maxPoint.getX(), (int) this.maxPoint.getZ(), (int) this.plotSize,
-                            (this.isClaimed ? 1 : 0), this.id);
-    }
-
-    public void resetLand(Player player) {
-    	
-    	// Bugged worldguard chunk regen so not doing it this way anymore:
-    	// Deity.edit.regenRegion(getWorld(), "creative_" + id); 
-    	
-    	World currentWorld = getWorld();
-    	
-    	// Set air to clear
-    	Deity.edit.setAreaWithBlock(currentWorld.getName(), minPoint, maxPoint, "0");
-    	
-    	// Set dirt
-		Location minMarker = new Location(currentWorld,
-				getMinPoint().getX(), 1, getMinPoint().getZ());
-		Location maxMarker = new Location(currentWorld,
-				getMaxPoint().getX(), 18, getMaxPoint().getZ());				
-		int changedBlocks = Deity.edit.setAreaWithBlock(
-				currentWorld.getName(), minMarker, maxMarker, "3");
-		if (changedBlocks > 0) {
-			log.info("resetLand - Set base dirt.. " + changedBlocks + " modified by " + player.getName());
+	
+	public static void newPlot(Player player, CommandSender sender, Location pos, int side, int size){
+		int pathSize = 4;
+		int plotSizeAndPath = size + pathSize;
+		World world = pos.getWorld();
+		int playerX = pos.getBlockX();
+		int playerZ = pos.getBlockZ();
+		int plotCount = 0;
+		for(int i=0; i<side; i++){
+			for(int j=0; j<side; j++){
+				plotCount++;
+				int plotMinX = playerX + (j * plotSizeAndPath);
+				int plotMinZ = playerZ + (i * plotSizeAndPath);
+				
+				int plotMaxX = plotMinX + plotSizeAndPath - 1;
+				int plotMaxZ = plotMinZ + plotSizeAndPath - 1;
+				
+				Location minMarker = new Location(world, plotMinX, 1, plotMinZ);
+				Location maxMarker = new Location(world, plotMaxX, 1, plotMaxZ);
+				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "0"); //air
+				
+				minMarker = new Location(world, plotMinX, 1, plotMinZ);
+				maxMarker = new Location(world, plotMaxX, 2, plotMaxZ); //originally 18
+				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "3"); //dirt
+				
+				minMarker = new Location(world, plotMinX, 3, plotMinZ); //originally 19
+				maxMarker = new Location(world, plotMaxX, 3, plotMaxZ); //originally 19
+				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "2"); //grass
+				
+				minMarker = new Location(world, plotMinX, 4, plotMinZ); //originally 20
+				maxMarker = new Location(world, plotMaxX, 4, plotMaxZ); //originally 20
+				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "43"); //double half slab
+				
+				minMarker = new Location(world, plotMinX, 4, plotMinZ); //originally 20
+				maxMarker = new Location(world, plotMaxX - pathSize, 4, plotMaxZ - pathSize); //originally 20
+				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "0"); //air
+				
+				setupRegion(plotMinX, plotMinZ, (plotMaxX - pathSize), (plotMaxZ - pathSize), size, world, sender);
+			}
 		}
 		
+		//create missing edges
+		int sideLength = (size * side) + (side * pathSize) - 1;
+		
+		Location corner = new Location(world, playerX - pathSize + 1, 4, playerZ - pathSize + 1);
+		Location point = new Location(world, playerX, 4, playerZ + sideLength);
+		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), corner, point, "43"); //double half slab
+		
+		point = new Location(world, playerX + sideLength, 4, playerZ);
+		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), corner, point, "43"); //double half slab
+		
+		DeityCreative.plugin.chat.sendPlayerMessage(player, "&aDone creating plots " + plotCount + " plots!");
+	}
+	
+	public static void newPlot(World world, Location min, Location max){
+		if (min.getX() > max.getX()) {
+            double tmpMinX = min.getX();
+            double tmpMaxX = max.getX();
+            min.setX(tmpMaxX);
+            max.setX(tmpMinX);
+	    }
+	    if (min.getZ() > max.getZ()) {
+	            double tmpMinZ = min.getZ();
+	            double tmpMaxZ = max.getZ();
+	            min.setZ(tmpMaxZ);
+	            max.setZ(tmpMinZ);
+	    }
+
+        String sql = "SELECT MAX(id) FROM " + DeityCreative.database.tableName("deity_creative_", "plots") + " WHERE id > 2000";
+        DatabaseResults query = DeityCreative.database.readEnhanced(sql, new Object[]{});
+
+		if (query != null) {
+			try {
+				int id = 3000;
+				if (query.getInteger(0, "MAX(id)") != null && query.getInteger(0, "MAX(id)") != 0) {
+					id = query.getInteger(0, "MAX(id)") + 1;
+				}
+				sql = "INSERT INTO " + DeityCreative.database.tableName("deity_creative_", "plots")
+						+ " (`id`, `world`, `min_x`, `min_z`, `max_x`, `max_z`) "
+						+ " VALUES (?, ?,?,?,?,?);";
+
+				DeityCreative.database.write(sql, id, world.getName(), (int) min.getX(), (int) min.getZ(), (int) max.getX(), (int) max.getZ());
+				DeityAPI.getAPI().getSecAPI().protectRegion(world, "creative_" + id, min, max);
+			} catch (SQLDataException e1) {
+				e1.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void setupRegion(double plotMinX, double plotMinZ, double plotMaxX, double plotMaxZ, int plotSize, World currentWorld, CommandSender sender) {
+		String sql = "SELECT MAX(id) FROM " + DeityCreative.database.tableName("deity_creative_", "plots") + " WHERE id > 2000";
+		DatabaseResults query = DeityCreative.database.readEnhanced(sql, new Object[]{});
+		if (query != null) {
+			try {
+				int id = 3000;
+				if (query.getInteger(0, "MAX(id)") != null
+						&& query.getInteger(0, "MAX(id)") != 0) {
+					id = query.getInteger(0, "MAX(id)") + 1;
+				}
+				sql = "INSERT INTO "
+						+ DeityCreative.database.tableName("deity_creative_", "plots")
+						+ " (`id`, `world`, `min_x`, `min_z`, `max_x`, `max_z`, plot_size) "
+						+ " VALUES (?, ?, ?, ?, ?, ?, ?);";
+				DeityCreative.database.write(sql, id, currentWorld.getName(), (int) plotMinX, (int) plotMinZ, (int) plotMaxX, (int) plotMaxZ, plotSize);
+				DeityAPI.getAPI().getSecAPI().protectRegion(currentWorld, "creative_" + id,
+						new Location(currentWorld, plotMinX, 1, plotMinZ),
+						new Location(currentWorld, plotMaxX, 127, plotMaxZ));
+				DeityAPI.getAPI().getSecAPI().setGreetingFlag("creative_" + id, sender, "Available Plot [" + id + "]");
+			} catch (SQLDataException e1) {
+				e1.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void setAllFields(DatabaseResults query) throws SQLDataException {
+		if (query.getInteger(0, "id") != null) {
+			this.id = query.getInteger(0, "id");
+		}
+		if (query.getString(0, "playername") != null) {
+			this.playername = (query.getString(0, "playername"));
+		}
+		if (query.getString(0, "world") != null) {
+			this.world = DeityCreative.plugin.getServer().getWorld(
+					query.getString(0, "world"));
+		}
+		int x = 0, z = 0;
+		if (query.getInteger(0, "min_x") != null) {
+			x = query.getInteger(0, "min_x");
+		}
+		if (query.getInteger(0, "min_z") != null) {
+			z = query.getInteger(0, "min_z");
+		}
+		this.minPoint = new Location(world, x, 1, z);
+
+		if (query.getInteger(0, "max_x") != null) {
+			x = query.getInteger(0, "max_x");
+		}
+		if (query.getInteger(0, "max_z") != null) {
+			z = query.getInteger(0, "max_z");
+		}
+		if (query.getInteger(0, "plot_size") != null) {
+			this.plotSize = query.getInteger(0, "plot_size");
+		}
+		this.maxPoint = new Location(world, x, 127, z);
+
+		if (query.getInteger(0, "is_claimed") != null) {
+			this.isClaimed = (query.getInteger(0, "is_claimed") == 0 ? false
+					: true);
+		}
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void addPlayer(String playername) throws IOException {
+		this.playername = playername;
+		/*
+		 * String sql = "UPDATE " +
+		 * Deity.data.getDB().tableName("deity_creative_", "plots") +
+		 * " SET `playername` = ? WHERE `id` = ?;";
+		 * 
+		 * Deity.data.getDB().Write(sql, playername, this.getId());
+		 */
+		DeityAPI.getAPI().getSecAPI().addMemberToRegion(playername, this.getWorld(), "creative_" + this.getId());
+	}
+
+	public void removePlayer(String playername) throws IOException {
+		this.playername = "";
+		String sql = "UPDATE " + DeityCreative.database.tableName("deity_creative_", "plots") + " SET `playername` = '' WHERE `id` = ?;";
+		DeityCreative.database.write(sql, this.getId());
+		DeityAPI.getAPI().getSecAPI().removeMemberFromRegion(playername, this.getWorld(), "creative_" + this.getId());
+	}
+
+	public String getPlayername() {
+		return playername;
+	}
+
+	public World getWorld() {
+		return world;
+	}
+
+	public void setWorld(World world) {
+		this.world = world;
+	}
+
+	public Location getMinPoint() {
+		return minPoint;
+	}
+
+	public void setMinPoint(Location minPoint) {
+		this.minPoint = minPoint;
+	}
+
+	public Location getMaxPoint() {
+		return maxPoint;
+	}
+
+	public void setMaxPoint(Location maxPoint) {
+		this.maxPoint = maxPoint;
+	}
+
+	public Integer getPlotSize() {
+		return plotSize;
+	}
+
+	public boolean isClaimed() {
+		return isClaimed;
+	}
+
+	public void setClaimed(boolean isClaimed) {
+		this.isClaimed = isClaimed;
+	}
+
+	public void save() {
+		String sql = "UPDATE " + DeityCreative.database.tableName("deity_creative_", "plots")
+				+ " SET `playername` = ?, `world` = ?, `min_x` = ?, `min_z` = ?, "
+				+ "`max_x` = ?, `max_z` = ?, `plot_size` = ?, `is_claimed` = ? WHERE `id` = ?;";
+
+		DeityCreative.database.write(sql, this.playername, this.world.getName(),
+				(int) this.minPoint.getX(), (int) this.minPoint.getZ(),
+				(int) this.maxPoint.getX(), (int) this.maxPoint.getZ(),
+				(int) this.plotSize, (this.isClaimed ? 1 : 0), this.id);
+	}
+
+	public void resetLand(Player player) {
+
+		// Bugged worldguard chunk regen so not doing it this way anymore:
+		// Deity.edit.regenRegion(getWorld(), "creative_" + id);
+
+		World currentWorld = getWorld();
+
+		// Set air to clear
+		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(currentWorld.getName(), minPoint, maxPoint, "0"); //air
+
+		// Set dirt
+		Location minMarker = new Location(currentWorld, getMinPoint().getX(), 1, getMinPoint().getZ());
+		Location maxMarker = new Location(currentWorld, getMaxPoint().getX(), 2, getMaxPoint().getZ()); //originally 18
+		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(currentWorld.getName(), minMarker, maxMarker, "3"); //dirt
+
 		// Create base grass
-		minMarker = new Location(currentWorld,
-				getMinPoint().getX(), 19, getMinPoint().getZ());
-		maxMarker =  new Location(currentWorld,
-				getMaxPoint().getX(), 19, getMaxPoint().getZ());			
-		changedBlocks = Deity.edit.setAreaWithBlock(
-				currentWorld.getName(), minMarker, maxMarker, "2");
-		if (changedBlocks > 0) {
-			log.info("resetLand - Set base grass.. " + changedBlocks + " modified by " + player.getName());
-		}
-    }
+		minMarker = new Location(currentWorld, getMinPoint().getX(), 3, getMinPoint().getZ()); //originally 19
+		maxMarker = new Location(currentWorld, getMaxPoint().getX(), 3, getMaxPoint().getZ()); //originally 19
+		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(currentWorld.getName(), minMarker, maxMarker, "2"); //grass
+		
+	}
 
-
-
-
-    // public void saveLand() {
-    // Deity.edit.saveSchematicFromRegion(playername + "_" + id, "creative_"
-    // + id, this.getWorld().getName());
-    // }
+	// public void saveLand() {
+	// Deity.edit.saveSchematicFromRegion(playername + "_" + id, "creative_"
+	// + id, this.getWorld().getName());
+	// }
+	
 }
-
-
