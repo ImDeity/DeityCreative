@@ -1,0 +1,11 @@
+name: DeityCreative
+version: 0.5
+author: ImDeity
+website: http://imdeity.com/
+description: ImDeity Creative
+main: com.imdeity.deitycreative.DeityCreative
+depend: [DeityAPI]
+commands:
+  creative:
+    description: ImDeity Creative
+    usage: /creative Creative commands
