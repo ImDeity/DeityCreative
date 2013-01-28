@@ -1,6 +1,7 @@
 package com.imdeity.deitycreative.cmds;
 
 import com.imdeity.deityapi.api.DeityCommandHandler;
+import com.imdeity.deitycreative.cmds.creative.CreativeAddPlayersCommand;
 import com.imdeity.deitycreative.cmds.creative.CreativeClaimCommand;
 import com.imdeity.deitycreative.cmds.creative.CreativeCreateCommand;
 import com.imdeity.deitycreative.cmds.creative.CreativeForceUnclaimCommand;
@@ -23,7 +24,8 @@ public class CreativeCommandHandler extends DeityCommandHandler {
 		registerCommand("unclaim", new String[]{}, "", "Unclaim your plot", new CreativeUnclaimCommand(), "");
 		registerCommand("home", new String[]{}, "", "Go to your plot", new CreativeHomeCommand(), "");
 		registerCommand("teleport", new String[]{"tp"}, "<player>", "Teleport to someone elses plot", new CreativeTeleportCommand(), "");
-		registerCommand("forceunclaim", new String[]{"fu"}, "", "Forceably unclaim a plot", new CreativeForceUnclaimCommand(), "deity.creatice.forceunclaim");
+		registerCommand("forceunclaim", new String[]{"fu"}, "", "Forceably unclaim a plot", new CreativeForceUnclaimCommand(), "deity.creative.forceunclaim");
+		registerCommand("add-players", new String[]{"ap"}, "", "Add current players to databse that aren't already", new CreativeAddPlayersCommand(), "deity.creative.addplayers");
 	}
 
 }

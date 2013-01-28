@@ -25,6 +25,14 @@ public enum CreativeRank {
 		return color + name;
 	}
 	
+	public static CreativeRank getRank(String rank){
+		for(CreativeRank r : CreativeRank.values()){
+			if(r.getName().equalsIgnoreCase(rank))
+				return r;
+		}
+		return null;
+	}
+	
 	public String toString(){ return getName(); }
 	
 }

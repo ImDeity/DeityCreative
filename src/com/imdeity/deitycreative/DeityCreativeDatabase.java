@@ -1,6 +1,10 @@
 package com.imdeity.deitycreative;
 
+import java.sql.SQLDataException;
+
+import com.imdeity.deityapi.DeityAPI;
 import com.imdeity.deityapi.records.Database;
+import com.imdeity.deityapi.records.DatabaseResults;
 
 public class DeityCreativeDatabase extends Database {
 
@@ -9,7 +13,7 @@ public class DeityCreativeDatabase extends Database {
 		createTables();
 	}
 	
-	/* Rank Suggestions:
+	/* Rank suggestions from players:
 	 * 
 	 * Foreman
 	 * Architect
@@ -28,11 +32,41 @@ public class DeityCreativeDatabase extends Database {
 		        "`is_claimed` INT(1) NOT NULL DEFAULT '0', `plot_size` INT(3), PRIMARY KEY (`id`) , KEY (`playername`)" +
 		        ") ENGINE=MYISAM COMMENT='Deity Creative World Plots' AUTO_INCREMENT=1000;";
 		write(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + tableName("deity_creative_", "players")
-				+ " (`id` INT(16) NOT NULL AUTO_INCREMENT PRIMARY KEY, `playername` VARCHAR(16) NOT NULL," +
-				" `rank` VARCHAR(20) NOT NULL DEFAULT 'Crafter', `needs_promo` INT(1) NOT NULL DEFAULT '0'" +
+		sql = "CREATE TABLE IF NOT EXISTS " + tableName("deity_creative_", "players") +
+				" (`id` INT(16) NOT NULL AUTO_INCREMENT PRIMARY KEY, `playername` VARCHAR(16) NOT NULL," +
+				" `rank` VARCHAR(20) NOT NULL DEFAULT '" + CreativeRank.RANK_1.getName() + "', `needs_promo` INT(1) NOT NULL DEFAULT '0'" +
 				") ENGINE=MYISAM COMMENT='ImDeity Creative Player Table'";
 		
+	}
+	
+	public CreativeRank getRankOfPlayer(String name){
+		
+		return null;
+	}
+	
+	public void addCurrentPlayersToTable() throws SQLDataException{
+		DatabaseResults players = getPlayers();
+		for(int i=0; i<players.rowCount(); i++){
+			String name = players.getString(i, "playername");
+			if(!isInPlayerTable(name)){
+				String sql = "INSERT INTO " + tableName("deity_creative_", "players") + " (`playername`) VALUES (?)";
+				write(sql, name);
+			}
+		}
+	}
+	
+	private boolean isInPlayerTable(String name) throws SQLDataException{
+		DatabaseResults players = getPlayers();
+		for(int i=0; i<players.rowCount(); i++){
+			String player = players.getString(i, "playername");
+			if(player.equalsIgnoreCase(name)) return true;
+		}
+		return false;
+	}
+	
+	public DatabaseResults getPlayers(){
+		String sql = "SELECT `playername` FROM " + tableName("deity_creative_", "players");
+		return readEnhanced(sql);
 	}
 
 }
