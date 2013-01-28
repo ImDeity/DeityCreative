@@ -33,6 +33,10 @@ public enum CreativeRank {
 		return null;
 	}
 	
+	public static CreativeRank getMaxRank(){
+		return RANK_6;
+	}
+	
 	public String toString(){ return getName(); }
 	
 }

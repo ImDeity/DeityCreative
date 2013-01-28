@@ -26,7 +26,7 @@ public class CreativeForceUnclaimCommand extends DeityCommandReceiver {
 	@Override
 	public boolean onPlayerRunCommand(Player player, String[] args) {
 		//!Deity.perm.has(player, "deity.creative.forceunclaim") permission added to registerCommand() call instead
-		if (!DeityAPI.getAPI().getDeityPermAPI().isSubAdmin(player) && !DeityAPI.getAPI().getDeityPermAPI().isAdmin(player)) {
+		if (!DeityAPI.getAPI().getDeityPermAPI().isLeastSubAdmin(player)) {
 			DeityCreative.plugin.chat.sendPlayerMessage(player, "&cAdmin permissions required");
 			return false;
 		}

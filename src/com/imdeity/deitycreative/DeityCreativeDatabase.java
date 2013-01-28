@@ -2,6 +2,8 @@ package com.imdeity.deitycreative;
 
 import java.sql.SQLDataException;
 
+import org.bukkit.entity.Player;
+
 import com.imdeity.deityapi.DeityAPI;
 import com.imdeity.deityapi.records.Database;
 import com.imdeity.deityapi.records.DatabaseResults;
@@ -39,9 +41,27 @@ public class DeityCreativeDatabase extends Database {
 		
 	}
 	
-	public CreativeRank getRankOfPlayer(String name){
-		
-		return null;
+	public CreativeRank getRankOfPlayer(String name) throws SQLDataException{
+		return CreativeRank.getRank(getPlayerData(name).getString(0, "playername"));
+	}
+	
+	public boolean needsPromotion(String name) throws SQLDataException{
+		return getPlayerData(name).getBoolean(0, "needs_promo");
+	}
+	
+	public void promotePlayer(Player promoter, String name) throws SQLDataException{
+		if(getRankOfPlayer(name) == CreativeRank.getMaxRank()){
+			DeityAPI.getAPI().getChatAPI().sendPlayerMessage(promoter, "&cThat player is already at the highest rank");
+		}else{
+			if(needsPromotion(name)){
+				String sql = "UPDATE " + tableName("deity_creative_", "plots") + "WHERE `playername`='" + name + "' SET ";
+			}
+		}
+	}
+	
+	public DatabaseResults getPlayerData(String name){
+		String sql = "SELECT * FROM " + tableName("deity_creative_", "plots") + " WHERE `playername`='" + name + "'";
+		return readEnhanced(sql);
 	}
 	
 	public void addCurrentPlayersToTable() throws SQLDataException{
