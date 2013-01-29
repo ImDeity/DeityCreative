@@ -60,7 +60,6 @@ public class CreativeClaimCommand extends DeityCommandReceiver {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
 		} else {
 			DeityCreative.plugin.chat.sendPlayerMessage(player, "Sorry there are currently no plots available to claim. Please try again later");
 		}

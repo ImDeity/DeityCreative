@@ -17,11 +17,15 @@ public class CreativePromoteCommand extends DeityCommandReceiver {
 	@Override
 	public boolean onPlayerRunCommand(Player player, String[] args) {
 		//TIME TO ADD SEXYNESS
-		if(!DeityAPI.getAPI().getDeityPermAPI().isLeastModerator(player)) {
-			DeityCreative.plugin.chat.sendPlayerMessage(player, "&cModerator permissions required");
+		if(!DeityAPI.getAPI().getDeityPermAPI().isLeastSubAdmin(player)) {
+			DeityCreative.plugin.chat.sendPlayerMessage(player, "&cAdmin permissions required");
 			return false;
 		}
-		
+		if(args.length == 0){
+			DeityCreative.plugin.chat.sendPlayerMessage(player, "&cNeed to specify a player");
+		}else{
+			DeityCreative.database.promotePlayer(player, args[0]);
+		}
 		return false;
 	}
 

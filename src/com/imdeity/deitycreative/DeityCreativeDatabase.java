@@ -4,6 +4,7 @@ import java.sql.SQLDataException;
 
 import org.bukkit.entity.Player;
 
+import com.imdeity.deityapi.DeityAPI;
 import com.imdeity.deityapi.records.Database;
 import com.imdeity.deityapi.records.DatabaseResults;
 
@@ -54,7 +55,12 @@ public class DeityCreativeDatabase extends Database {
 	
 	public boolean needsPromotion(String name){
 		try {
-			return getPlayerData(name).getBoolean(0, "needs_promo");
+			DatabaseResults data = getPlayerData(name);
+			if(data == null){
+				return false;
+			}else{
+				return data.getBoolean(0, "needs_promo");
+			}
 		} catch (SQLDataException e) {
 			e.printStackTrace();
 			return false;
@@ -65,15 +71,14 @@ public class DeityCreativeDatabase extends Database {
 		CreativeRank rank = getRankOfPlayer(name);
 		if(rank == CreativeRank.getMaxRank()){
 			//player cannot be promoted any further
-			DeityCreative.plugin.chat.sendPlayerMessage(promoter, "&cThat player is already at the highest rank");
+			DeityCreative.plugin.chat.sendPlayerMessage(promoter, "&cThat player cannot be promoted any further");
 		}else{
 			if(needsPromotion(name)){
 				//set their rank in the database to the next rank
 				String sql = "UPDATE " + plots + "SET `rank`='" + CreativeRank.nextRank(rank) + "' WHERE `playername`='" + name + "'";
 				write(sql);
 				//send the player mail saying they have been promoted
-				sql = "INSERT INTO " + tableName("mail_", "data") + " (`sender`, `receiver`, `message`)";
-				write(sql, "DeityCreative", name, "&bYou have been promoted! Type &3/creative claim&b to claim your new, larger plot!");
+				DeityAPI.getAPI().getChatAPI().sendMailToPlayer("DeityCreative", name, "&bYou have been promoted! Type &3/creative claim&b to claim your new, larger plot!");
 			}else{
 				//player hasn't requested a promotion
 				DeityCreative.plugin.chat.sendPlayerMessage(promoter, "&cThat player has not requested a promotion");
