@@ -20,14 +20,14 @@ public class CreativeCommandHandler extends DeityCommandHandler {
 	@Override
 	protected void initRegisteredCommands() {
 		registerCommand("", new String[]{}, "", "Teleport to the creative world", new CreativePortCommand(), "creativecontrol.spawn");
-		registerCommand("create", new String[]{}, "<Plots per side> <Size of plot side>", "Create creative plots", new CreativeCreateCommand() , "");
-		registerCommand("claim", new String[]{}, "", "Claim a plot", new CreativeClaimCommand(), "");
-		registerCommand("unclaim", new String[]{}, "", "Unclaim your plot", new CreativeUnclaimCommand(), "");
-		registerCommand("home", new String[]{}, "", "Go to your plot", new CreativeHomeCommand(), "");
+		registerCommand("create", new String[]{"make"}, "<Plots per side> <Size of plot side>", "Create creative plots", new CreativeCreateCommand() , "");
+		registerCommand("claim", new String[]{"me-gusta"}, "", "Claim a plot", new CreativeClaimCommand(), "");
+		registerCommand("unclaim", new String[]{"no-want"}, "", "Unclaim your plot", new CreativeUnclaimCommand(), "");
+		registerCommand("home", new String[]{"mine"}, "", "Go to your plot", new CreativeHomeCommand(), "");
 		registerCommand("teleport", new String[]{"tp"}, "<player>", "Teleport to someone elses plot", new CreativeTeleportCommand(), "");
 		registerCommand("forceunclaim", new String[]{"fu"}, "", "Forceably unclaim a plot", new CreativeForceUnclaimCommand(), "deity.creative.forceunclaim");
-		registerCommand("add-players", new String[]{"ap"}, "", "Add current players to databse that aren't already", new CreativeAddPlayersCommand(), "deity.creative.addplayers");
-		registerCommand("promote", new String[]{"add-sexyness"}, "<player>", "Promote a player", new CreativePromoteCommand(), "deity.creative.promote");
+		registerCommand("add-players", new String[]{"ap"}, "", "Add current players to database that aren't already", new CreativeAddPlayersCommand(), "deity.creative.addplayers");
+		registerCommand("promote", new String[]{"add-sexyness", "accept"}, "<player>", "Promote a player", new CreativePromoteCommand(), "deity.creative.promote");
 	}
-
+	
 }
