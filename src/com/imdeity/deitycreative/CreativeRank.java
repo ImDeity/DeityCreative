@@ -2,6 +2,12 @@ package com.imdeity.deitycreative;
 
 public enum CreativeRank {
 
+	/* to change the name of a rank at any time:
+	 * 
+	 * 1) change enum
+	 * 2) UPDATE `deity_creative_players` SET `rank`='{new-rank}' WHERE `rank`='{old-rank}'
+	 */
+	
 	//gray, white, greens, blues
 	RANK_1("Crafter", '7', 32),
 	RANK_2("Contructor", 'f', 48),
@@ -39,17 +45,27 @@ public enum CreativeRank {
 		return null;
 	}
 	
+	public static CreativeRank getRank(int place){
+		for(CreativeRank r : CreativeRank.values())
+			if(r.getPlace() == place) return r;
+		return null;
+	}
+	
 	public static CreativeRank getMaxRank(){
 		return RANK_6;
 	}
 	
 	public static CreativeRank nextRank(CreativeRank rank){
-		boolean isNext = false;
-		for(CreativeRank r : CreativeRank.values()){
-			if(isNext) return r;
-			else if(rank == r) isNext = true;
-		}
-		return null;
+		if(rank == RANK_1)
+			return RANK_2;
+		else if(rank == RANK_2)
+			return RANK_3;
+		else if(rank == RANK_3)
+			return RANK_4;
+		else if(rank == RANK_4)
+			return RANK_5;
+		else return RANK_6;
+		
 	}
 	
 	public int getPlace(){

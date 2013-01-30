@@ -32,14 +32,16 @@ public class CreativeClaimCommand extends DeityCommandReceiver {
 		
 		if(!DeityCreative.database.canClaim(player.getName())){
 			DeityCreative.plugin.chat.sendPlayerMessage(player, "&cSorry you cannot claim another plot yet. ");
+			return true;
 		}
 
 //		String sql = "SELECT `id` FROM " + DeityCreative.database.tableName("deity_creative_", "plots")
 //				+ " WHERE is_claimed = 0 AND playername = '' AND id > 2000 ORDER BY `id` ASC LIMIT 1;";
 //		DatabaseResults query2 = DeityCreative.database.readEnhanced(sql);
 		CreativeRank rank = DeityCreative.database.getRankOfPlayer(player.getName());
-		String sql = "SELECT `id` FROM " + DeityCreative.database.plots + " WHERE plot_size='" + rank.getPlotSize() +
-				"is_claimed=0 AND playername='' AND id > 2000 ORDER BY `id` ASC LIMIT 1";
+		int plotSize = rank == null ? CreativeRank.RANK_1.getPlotSize() : rank.getPlotSize();
+		String sql = "SELECT `id` FROM " + DeityCreative.database.plots + " WHERE plot_size='" + plotSize +
+				"' AND is_claimed='0' AND playername='' AND id > 2000 ORDER BY `id` ASC LIMIT 1";
 		DatabaseResults query2 = DeityCreative.database.readEnhanced(sql);
 		if (query2 != null && query2.hasRows()) {
 			try {
@@ -50,6 +52,10 @@ public class CreativeClaimCommand extends DeityCommandReceiver {
 					plot.setClaimed(true);
 					plot.save();
 					DeityAPI.getAPI().getSecAPI().setGreetingFlag("creative_" + id, player, "Owner: " + player.getName() + " [" + id + "]");
+					if(rank == CreativeRank.RANK_1){ //this is the first plot this player has claimed, add them to table
+						sql = "INSERT INTO " + DeityCreative.database.players + " (`playername`) VALUES (?)";
+						DeityCreative.database.write(sql, player.getName());
+					}
 					new CreativeHomeCommand().onPlayerRunCommand(player, args);
 				} else {
 					DeityCreative.plugin.chat.sendPlayerMessage(player, "Sorry there are currently no plots available to claim. Please try again later");

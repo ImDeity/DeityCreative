@@ -27,9 +27,13 @@ public class CreativeRejectCommand extends DeityCommandReceiver {
 			if(plot == null){
 				DeityCreative.plugin.chat.sendPlayerMessage(player, "&6" + args[0] + "&c's plot cannot be found");
 			}else{
-				plot.resetLand();
-				DeityCreative.database.setNeedsPromo(args[0], false);
-				DeityAPI.getAPI().getChatAPI().sendMailToPlayer("DeityCreative", args[0], "Your promotion request has been rejected and you plot has been reset. Try again");
+				if(DeityCreative.database.needsPromotion(player.getName())){
+					plot.resetLand();
+					DeityCreative.database.setNeedsPromo(args[0], false);
+					DeityAPI.getAPI().getChatAPI().sendMailToPlayer("DeityCreative", args[0], "Your promotion request has been rejected and you plot has been reset. Try again");
+				}else{
+					DeityCreative.plugin.chat.sendPlayerMessage(player, "&cThat player has not requested a promotion");
+				}
 			}
 		}
 		return true;

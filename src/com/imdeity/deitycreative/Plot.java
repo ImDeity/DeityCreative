@@ -124,8 +124,8 @@ public class Plot {
 	}
 	
 	private static void setupRegion(double plotMinX, double plotMinZ, double plotMaxX, double plotMaxZ, int plotSize, World currentWorld, CommandSender sender) {
-		String sql = "SELECT MAX(id) FROM " + DeityCreative.database.tableName("deity_creative_", "plots") + " WHERE id > 2000";
-		DatabaseResults query = DeityCreative.database.readEnhanced(sql, new Object[]{});
+		String sql = "SELECT MAX(id) FROM " + DeityCreative.database.plots + " WHERE id > 2000";
+		DatabaseResults query = DeityCreative.database.readEnhanced(sql);
 		if (query != null) {
 			try {
 				int id = 3000;
@@ -277,12 +277,12 @@ public class Plot {
 
 		// Set dirt
 		Location minMarker = new Location(currentWorld, getMinPoint().getX(), 1, getMinPoint().getZ());
-		Location maxMarker = new Location(currentWorld, getMaxPoint().getX(), 2, getMaxPoint().getZ()); //originally 18
+		Location maxMarker = new Location(currentWorld, getMaxPoint().getX(), 18, getMaxPoint().getZ());
 		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(currentWorld.getName(), minMarker, maxMarker, "3"); //dirt
 
 		// Create base grass
-		minMarker = new Location(currentWorld, getMinPoint().getX(), 3, getMinPoint().getZ()); //originally 19
-		maxMarker = new Location(currentWorld, getMaxPoint().getX(), 3, getMaxPoint().getZ()); //originally 19
+		minMarker = new Location(currentWorld, getMinPoint().getX(), 19, getMinPoint().getZ());
+		maxMarker = new Location(currentWorld, getMaxPoint().getX(), 19, getMaxPoint().getZ());
 		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(currentWorld.getName(), minMarker, maxMarker, "2"); //grass
 		
 	}

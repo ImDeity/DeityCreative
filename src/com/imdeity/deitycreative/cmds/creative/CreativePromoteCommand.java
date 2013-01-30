@@ -26,7 +26,7 @@ public class CreativePromoteCommand extends DeityCommandReceiver {
 		}else{
 			DeityCreative.database.promotePlayer(player, args[0]);
 		}
-		return false;
+		return true;
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.imdeity.deitycreative;
 
 import java.sql.SQLDataException;
+import java.util.ArrayList;
 
 import org.bukkit.entity.Player;
 
@@ -41,12 +42,14 @@ public class DeityCreativeDatabase extends Database {
 				" (`id` INT(16) NOT NULL AUTO_INCREMENT PRIMARY KEY, `playername` VARCHAR(16) NOT NULL," +
 				" `rank` VARCHAR(20) NOT NULL DEFAULT '" + CreativeRank.RANK_1.getName() + "', `needs_promo` INT(1) NOT NULL DEFAULT '0'" +
 				") ENGINE=MYISAM COMMENT='ImDeity Creative Player Table'";
+		write(sql); //derp
 		
 	}
 	
 	public CreativeRank getRankOfPlayer(String name){
 		try {
-			return CreativeRank.getRank(getPlayerData(name).getString(0, "playername"));
+			if(getPlayerData(name) == null) return CreativeRank.RANK_1;
+			return CreativeRank.getRank(getPlayerData(name).getString(0, "rank"));
 		} catch (SQLDataException e) {
 			e.printStackTrace();
 			return null;
@@ -56,11 +59,12 @@ public class DeityCreativeDatabase extends Database {
 	public boolean needsPromotion(String name){
 		try {
 			DatabaseResults data = getPlayerData(name);
-			if(data == null){
-				return false;
-			}else{
-				return data.getBoolean(0, "needs_promo");
-			}
+//			if(data == null){
+//				return false;
+//			}else{
+//				return data.getInteger(0, "needs_promo") == 1 ? true : false;
+//			}
+			return data.getInteger(0, "needs_promo") == 1 ? true : false;
 		} catch (SQLDataException e) {
 			e.printStackTrace();
 			return false;
@@ -81,8 +85,9 @@ public class DeityCreativeDatabase extends Database {
 		}else{
 			if(needsPromotion(name)){
 				//set their rank in the database to the next rank
-				String sql = "UPDATE " + plots + "SET `rank`='" + CreativeRank.nextRank(rank) + "' WHERE `playername`='" + name + "'";
+				String sql = "UPDATE " + players + "SET `rank`='" + CreativeRank.nextRank(rank) + "' WHERE `playername`='" + name + "'";
 				write(sql);
+				setNeedsPromo(name, false);
 				//send the player mail saying they have been promoted
 				DeityAPI.getAPI().getChatAPI().sendMailToPlayer("DeityCreative", name, "&bYou have been promoted! Type &3/creative claim&b to claim your new, larger plot!");
 			}else{
@@ -108,25 +113,48 @@ public class DeityCreativeDatabase extends Database {
 		}
 	}
 	
+	public ArrayList<Plot> getAllPlots(String name){
+		ArrayList<Plot> list = new ArrayList<Plot>();
+		String sql = "SELECT `id` FROM " + plots + "WHERE `playername`='" + name + "'";
+		DatabaseResults query = readEnhanced(sql);
+		if(query != null && query.hasRows()){
+			try{
+				for(int i=0; i<query.rowCount(); i++){
+					Plot plot = new Plot(query.getInteger(i, "id"));
+					list.add(plot);
+				}
+			} catch (SQLDataException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		return list;
+	}
+	
 	public boolean canClaim(String name){
 		String sql = "SELECT * FROM " + plots + " WHERE `playername`='" + name + "'";
 		DatabaseResults query = readEnhanced(sql);
 		//if the number of plots is less than there rank (ie player is rank 2 but has one plot claimed) then they can claim
-		return query.rowCount() > getRankOfPlayer(name).getPlace();
+		if(query == null){
+			return true;
+		}else{
+			return query.rowCount() < getRankOfPlayer(name).getPlace();
+		}
 	}
 	
 	public DatabaseResults getPlayerData(String name){
-		String sql = "SELECT * FROM " + plots + " WHERE `playername`='" + name + "'";
+		String sql = "SELECT * FROM " + players + " WHERE `playername`='" + name + "'";
 		return readEnhanced(sql);
 	}
 	
 	//adds players that already have a plot to the table, with default rank. This must be done before the ranking system takes effect
 	public void addCurrentPlayersToTable() throws SQLDataException{
-		DatabaseResults players = getPlayers();
+		String sql = "SELECT `playername` FROM " + plots;
+		DatabaseResults players = readEnhanced(sql);
 		for(int i=0; i<players.rowCount(); i++){
 			String name = players.getString(i, "playername");
-			if(!isInPlayerTable(name)){
-				String sql = "INSERT INTO " + players + " (`playername`) VALUES (?)";
+			if(!name.equalsIgnoreCase("") && !isInPlayerTable(name)){
+				sql = "INSERT INTO " + this.players + " (`playername`) VALUES (?)";
 				write(sql, name);
 			}
 		}
@@ -134,9 +162,13 @@ public class DeityCreativeDatabase extends Database {
 	
 	private boolean isInPlayerTable(String name) throws SQLDataException{
 		DatabaseResults players = getPlayers();
-		for(int i=0; i<players.rowCount(); i++){
-			String player = players.getString(i, "playername");
-			if(player.equalsIgnoreCase(name)) return true;
+		if(players == null){
+			return false;
+		}else{
+			for(int i=0; i<players.rowCount(); i++){
+				String player = players.getString(i, "playername");
+				if(player.equalsIgnoreCase(name)) return true;
+			}
 		}
 		return false;
 	}
