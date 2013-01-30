@@ -8,6 +8,7 @@ import com.imdeity.deitycreative.cmds.creative.CreativeForceUnclaimCommand;
 import com.imdeity.deitycreative.cmds.creative.CreativeHomeCommand;
 import com.imdeity.deitycreative.cmds.creative.CreativePortCommand;
 import com.imdeity.deitycreative.cmds.creative.CreativePromoteCommand;
+import com.imdeity.deitycreative.cmds.creative.CreativeRejectCommand;
 import com.imdeity.deitycreative.cmds.creative.CreativeTeleportCommand;
 import com.imdeity.deitycreative.cmds.creative.CreativeUnclaimCommand;
 
@@ -28,6 +29,7 @@ public class CreativeCommandHandler extends DeityCommandHandler {
 		registerCommand("forceunclaim", new String[]{"fu"}, "", "Forceably unclaim a plot", new CreativeForceUnclaimCommand(), "deity.creative.forceunclaim");
 		registerCommand("add-players", new String[]{"ap"}, "", "Add current players to database that aren't already", new CreativeAddPlayersCommand(), "deity.creative.addplayers");
 		registerCommand("promote", new String[]{"add-sexyness", "accept"}, "<player>", "Promote a player", new CreativePromoteCommand(), "deity.creative.promote");
+		registerCommand("reject", new String[]{"no-like"}, "<player>", "Reject a plaeyer's promotion request", new CreativeRejectCommand(), "deity.creative.reject");
 	}
 	
 }

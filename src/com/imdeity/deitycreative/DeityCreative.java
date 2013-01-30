@@ -6,13 +6,10 @@ import com.imdeity.deitycreative.cmds.CreativeCommandHandler;
 /*
  * DeityCreative, ported to the new API.
  * 
- * Most of the code is the same as the original (for now). The code that has changed would be code in which
- * the format had to change. For instance, Deity.sec would need to be changed to DeityAPI.getAPI().getSecAPI().
+ * Promotion system in the works, /creative promote <player> to promote someone
  * 
- * Also, instead of all the commands being in the main class, each command now has own DeityCommandReciever class.
- * 
- * BUG: when using /creative create, two sides are missing from the plots. Therefore the one in the middle are fine, but
- * some on the edges have sides missing.
+ * Promotion request can be denied with /creative reject <player>. This will clear the land and set their
+ * `needs_promo` to 0 (false)
  */
 
 public class DeityCreative extends DeityPlugin{

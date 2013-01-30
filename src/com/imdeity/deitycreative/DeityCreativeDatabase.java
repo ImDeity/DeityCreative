@@ -38,7 +38,7 @@ public class DeityCreativeDatabase extends Database {
 		        ") ENGINE=MYISAM COMMENT='Deity Creative World Plots' AUTO_INCREMENT=1000;";
 		write(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + players +
-				" (`id` INT(16) NOT NULL AUTO_INCREMENT PRIMARY KEY, `playername` VARCHAR(16) UNIQUE NOT NULL," +
+				" (`id` INT(16) NOT NULL AUTO_INCREMENT PRIMARY KEY, `playername` VARCHAR(16) NOT NULL," +
 				" `rank` VARCHAR(20) NOT NULL DEFAULT '" + CreativeRank.RANK_1.getName() + "', `needs_promo` INT(1) NOT NULL DEFAULT '0'" +
 				") ENGINE=MYISAM COMMENT='ImDeity Creative Player Table'";
 		
@@ -67,6 +67,12 @@ public class DeityCreativeDatabase extends Database {
 		}
 	}
 	
+	public void setNeedsPromo(String name, boolean needed){
+		int promo = needed ? 1 : 0;
+		String sql = "UPDATE " + players + " SET `needs_promo`='" + promo + "' WHERE `playername`='" + name + "'";
+		write(sql);
+	}
+	
 	public void promotePlayer(Player promoter, String name){
 		CreativeRank rank = getRankOfPlayer(name);
 		if(rank == CreativeRank.getMaxRank()){
@@ -83,6 +89,22 @@ public class DeityCreativeDatabase extends Database {
 				//player hasn't requested a promotion
 				DeityCreative.plugin.chat.sendPlayerMessage(promoter, "&cThat player has not requested a promotion");
 			}
+		}
+	}
+	
+	//gets the players plot for his/her current rank. Returns null if there isn't one, or an error occurs
+	public Plot getCurrentPlot(String playername){
+		try {
+			String sql = "SELECT `id` FROM " + plots + " WHERE `playername`='" + playername + "' ORDER BY `id` DESC"; //using DESC because bigger plots will be claimed AFTER each other
+			DatabaseResults query = readEnhanced(sql);
+			if(query.hasRows()){
+				return new Plot(query.getInteger(0, "id"));
+			}else{
+				return null;
+			}
+		} catch (SQLDataException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 	

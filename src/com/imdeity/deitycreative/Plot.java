@@ -265,7 +265,7 @@ public class Plot {
 				(int) this.plotSize, (this.isClaimed ? 1 : 0), this.id);
 	}
 
-	public void resetLand(Player player) {
+	public void resetLand() {
 
 		// Bugged worldguard chunk regen so not doing it this way anymore:
 		// Deity.edit.regenRegion(getWorld(), "creative_" + id);

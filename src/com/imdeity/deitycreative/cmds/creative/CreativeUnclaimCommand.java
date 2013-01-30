@@ -33,7 +33,7 @@ public class CreativeUnclaimCommand extends DeityCommandReceiver {
 				}
 				plot.setClaimed(false);
 				plot.save();
-				plot.resetLand(player);
+				plot.resetLand();
 				DeityAPI.getAPI().getSecAPI().setGreetingFlag("creative_" + id, player, "Available Plot [" + id + "]");
 				DeityCreative.plugin.chat.sendPlayerMessage(player, "&ePlot unclaimed!");
 				return true;
