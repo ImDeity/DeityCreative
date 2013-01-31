@@ -23,9 +23,7 @@ public class DeityCreative extends DeityPlugin{
 	}
 
 	@Override
-	protected void initConfig() {
-		
-	}
+	protected void initConfig() {}
 
 	@Override
 	protected void initDatabase() {
@@ -37,21 +35,13 @@ public class DeityCreative extends DeityPlugin{
 	}
 
 	@Override
-	protected void initInternalDatamembers() {
-		// TODO may not need
-	}
+	protected void initInternalDatamembers() {}
 
 	@Override
-	protected void initLanguage() {
-		// TODO might not need
-	}
+	protected void initLanguage() {}
 
 	@Override
-	protected void initListeners() {
-		// TODO may need:
-		//        * BlockPlaceEvent (not your plot)
-		//			-> if not worldgaurd will do it
-	}
+	protected void initListeners() {}
 
 	@Override
 	protected void initPlugin() {

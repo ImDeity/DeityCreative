@@ -10,7 +10,7 @@ public enum CreativeRank {
 	
 	//gray, white, greens, blues
 	RANK_1("Crafter", '7', 32),
-	RANK_2("Contructor", 'f', 48),
+	RANK_2("Constructor", 'f', 48),
 	RANK_3("Blocksmith", 'a', 64),
 	RANK_4("Builder", '2', 128),
 	RANK_5("Architect", 'b', 256),

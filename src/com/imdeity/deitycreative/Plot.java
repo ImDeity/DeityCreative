@@ -13,7 +13,7 @@ import com.imdeity.deityapi.records.DatabaseResults;
 
 public class Plot {
 
-	public static final int DEFAULT_SIZE = 16;
+	public static final int PLOT_HEIGHT = 19;
 	private String playername;
 	private Location minPoint, maxPoint;
 	private World world;
@@ -54,19 +54,19 @@ public class Plot {
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "0"); //air
 				
 				minMarker = new Location(world, plotMinX, 1, plotMinZ);
-				maxMarker = new Location(world, plotMaxX, 18, plotMaxZ);
+				maxMarker = new Location(world, plotMaxX, PLOT_HEIGHT - 1, plotMaxZ);
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "3"); //dirt
 				
-				minMarker = new Location(world, plotMinX, 19, plotMinZ);
-				maxMarker = new Location(world, plotMaxX, 19, plotMaxZ);
+				minMarker = new Location(world, plotMinX, PLOT_HEIGHT, plotMinZ);
+				maxMarker = new Location(world, plotMaxX, PLOT_HEIGHT, plotMaxZ);
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "2"); //grass
 				
-				minMarker = new Location(world, plotMinX, 20, plotMinZ);
-				maxMarker = new Location(world, plotMaxX, 20, plotMaxZ);
+				minMarker = new Location(world, plotMinX, PLOT_HEIGHT + 1, plotMinZ);
+				maxMarker = new Location(world, plotMaxX, PLOT_HEIGHT + 1, plotMaxZ);
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "43"); //double half slab
 				
-				minMarker = new Location(world, plotMinX, 20, plotMinZ);
-				maxMarker = new Location(world, plotMaxX - pathSize, 20, plotMaxZ - pathSize); //originally 20
+				minMarker = new Location(world, plotMinX, PLOT_HEIGHT + 1, plotMinZ);
+				maxMarker = new Location(world, plotMaxX - pathSize, PLOT_HEIGHT + 1, plotMaxZ - pathSize); //originally 20
 				DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), minMarker, maxMarker, "0"); //air
 				
 				setupRegion(plotMinX, plotMinZ, (plotMaxX - pathSize), (plotMaxZ - pathSize), size, world, sender);
@@ -76,11 +76,11 @@ public class Plot {
 		//create missing edges
 		int sideLength = (size * side) + (side * pathSize) - 1;
 		
-		Location corner = new Location(world, playerX - pathSize + 1, 20, playerZ - pathSize + 1);
-		Location point = new Location(world, playerX, 20, playerZ + sideLength);
+		Location corner = new Location(world, playerX - pathSize + 1, PLOT_HEIGHT + 1, playerZ - pathSize + 1);
+		Location point = new Location(world, playerX, PLOT_HEIGHT + 1, playerZ + sideLength);
 		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), corner, point, "43"); //double half slab
 		
-		point = new Location(world, playerX + sideLength, 20, playerZ);
+		point = new Location(world, playerX + sideLength, PLOT_HEIGHT + 1, playerZ);
 		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(world.getName(), corner, point, "43"); //double half slab
 		
 		DeityCreative.plugin.chat.sendPlayerMessage(player, "&aDone creating plots " + plotCount + " plots!");
@@ -277,12 +277,12 @@ public class Plot {
 
 		// Set dirt
 		Location minMarker = new Location(currentWorld, getMinPoint().getX(), 1, getMinPoint().getZ());
-		Location maxMarker = new Location(currentWorld, getMaxPoint().getX(), 18, getMaxPoint().getZ());
+		Location maxMarker = new Location(currentWorld, getMaxPoint().getX(), PLOT_HEIGHT - 1, getMaxPoint().getZ());
 		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(currentWorld.getName(), minMarker, maxMarker, "3"); //dirt
 
 		// Create base grass
-		minMarker = new Location(currentWorld, getMinPoint().getX(), 19, getMinPoint().getZ());
-		maxMarker = new Location(currentWorld, getMaxPoint().getX(), 19, getMaxPoint().getZ());
+		minMarker = new Location(currentWorld, getMinPoint().getX(), PLOT_HEIGHT, getMinPoint().getZ());
+		maxMarker = new Location(currentWorld, getMaxPoint().getX(), PLOT_HEIGHT, getMaxPoint().getZ());
 		DeityAPI.getAPI().getWorldEditAPI().setAreaWithBlock(currentWorld.getName(), minMarker, maxMarker, "2"); //grass
 		
 	}

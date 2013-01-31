@@ -59,12 +59,11 @@ public class DeityCreativeDatabase extends Database {
 	public boolean needsPromotion(String name){
 		try {
 			DatabaseResults data = getPlayerData(name);
-//			if(data == null){
-//				return false;
-//			}else{
-//				return data.getInteger(0, "needs_promo") == 1 ? true : false;
-//			}
-			return data.getInteger(0, "needs_promo") == 1 ? true : false;
+			if(data == null){
+				return false;
+			}else{
+				return data.getInteger(0, "needs_promo") == 1 ? true : false;
+			}
 		} catch (SQLDataException e) {
 			e.printStackTrace();
 			return false;
@@ -88,8 +87,11 @@ public class DeityCreativeDatabase extends Database {
 				String sql = "UPDATE " + players + "SET `rank`='" + CreativeRank.nextRank(rank) + "' WHERE `playername`='" + name + "'";
 				write(sql);
 				setNeedsPromo(name, false);
+				rank = getRankOfPlayer(name);
 				//send the player mail saying they have been promoted
-				DeityAPI.getAPI().getChatAPI().sendMailToPlayer("DeityCreative", name, "&bYou have been promoted! Type &3/creative claim&b to claim your new, larger plot!");
+				DeityAPI.getAPI().getChatAPI().sendMailToPlayer("DeityCreative", name, "&bYou have been promoted to " + rank.getColorfulName() + 
+						"&b! Type &3/creative claim&b to claim your new, larger plot!");
+				DeityCreative.plugin.chat.sendPlayerMessage(promoter, "&aPlayer promoted to " + rank.getColorfulName());
 			}else{
 				//player hasn't requested a promotion
 				DeityCreative.plugin.chat.sendPlayerMessage(promoter, "&cThat player has not requested a promotion");
@@ -102,7 +104,7 @@ public class DeityCreativeDatabase extends Database {
 		try {
 			String sql = "SELECT `id` FROM " + plots + " WHERE `playername`='" + playername + "' ORDER BY `id` DESC"; //using DESC because bigger plots will be claimed AFTER each other
 			DatabaseResults query = readEnhanced(sql);
-			if(query.hasRows()){
+			if(query != null && query.hasRows()){
 				return new Plot(query.getInteger(0, "id"));
 			}else{
 				return null;

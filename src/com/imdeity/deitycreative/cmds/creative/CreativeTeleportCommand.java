@@ -37,7 +37,9 @@ public class CreativeTeleportCommand extends DeityCommandReceiver {
 		if(plots == null || plots.size() == 0){
 			DeityCreative.plugin.chat.sendPlayerMessage(player, "&cPlayer does not have any plots");
 		}else{
-			if(which == 0) which = plots.size() - 1;
+			if(which - 1 > plots.size()) which = 0;
+			else if(which == 0) which = plots.size() - 1;
+			else which -= 1;
 			Plot plot = plots.get(which);
 			if(plot != null){
 				int x = 0, y = 21, z = 0;
@@ -45,7 +47,7 @@ public class CreativeTeleportCommand extends DeityCommandReceiver {
 				z = (int) plot.getMaxPoint().getZ() + 1;
 				Location point = new Location(plot.getWorld(), x + .5, y, z + .5, 180, 0);
 				player.teleport(point);
-				DeityCreative.plugin.chat.sendPlayerMessage(player, "&eWelcome to &a" + playername + "&e's Plot!");
+				DeityCreative.plugin.chat.sendPlayerMessage(player, "&eWelcome to &a" + plot.getPlayername() + "&e's Plot!");
 				return true;
 			}else{
 				DeityCreative.plugin.chat.sendPlayerMessage(player, "&cPlot doesn't exist");
